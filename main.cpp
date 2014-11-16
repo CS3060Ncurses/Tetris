@@ -15,6 +15,7 @@ void paint(bool draw, int y, int x);
 
 int main() {
     initscr();
+    WINDOW * win = newwin(20, 40, 3, 20);
     
     if (has_colors() == FALSE) {
         endwin();
@@ -26,10 +27,12 @@ int main() {
     curs_set(0); // Hide the cursor
     noecho(); // Turn off echo
     keypad(stdscr, TRUE); // Enable arrow key input
-    halfdelay(10); // makes getch() return ERR if no input is detected within
+    halfdelay(4); // makes getch() return ERR if no input is detected within
                    // 1 second of the function being called. This is going to
                    // to be replaced for obvious reasons.
+    wborder(win, 0, 0, 0, 0, 0, 0, 0, 0);  
     refresh();
+    wrefresh(win);
     
     int c = 0; // Character read from stdin
     int x = 0; // x coordinate (column)
@@ -69,3 +72,4 @@ void paint(bool draw, int y, int x) {
     attroff(COLOR_PAIR(pair));
     refresh();
 }
+
