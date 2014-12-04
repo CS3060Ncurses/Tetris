@@ -15,8 +15,11 @@ void paint(bool draw, int y, int x);
 
 int main() {
     initscr();
-//    WINDOW * win = newwin(20, 40, 3, 20);  // creates a new window 
+    WINDOW * gameWin = newwin(22, 35, 5, 5);  // creates a new window 
     					     // params are (nlines, ncols, ystart, xstart)
+    WINDOW * nextBlockWin = newwin(7, 14, 5, 41);
+    WINDOW * infoWin = newwin(12, 14, 13, 41);
+
     if (has_colors() == FALSE) {
         endwin();
         printf("Your terminal needs to be colors to play Tetris!\n");
@@ -30,9 +33,13 @@ int main() {
     halfdelay(4); // makes getch() return ERR if no input is detected within
                    // 1 second of the function being called. This is going to
                    // to be replaced for obvious reasons.
-    wborder(stdscr, 0, 0, 0, 0, 0, 0, 0, 0);  // creates the border around the specified window
+    wborder(gameWin, 0, 0, 0, 0, 0, 0, 0, 0);  // creates the border around the specified window
+    wborder(nextBlockWin, 0, 0, 0, 0, 0, 0, 0, 0);
+    wborder(infoWin, 0, 0, 0, 0, 0, 0, 0, 0);
     refresh();
-//    wrefresh(win); // needed to refresh a specific window
+    wrefresh(gameWin); // needed to refresh a specific window
+    wrefresh(nextBlockWin);
+    wrefresh(infoWin);
     
     int c = 0; // Character read from stdin
     int x = 0; // x coordinate (column)
