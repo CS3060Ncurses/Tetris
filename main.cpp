@@ -17,8 +17,6 @@ void alarmFunc(int signal);
 bool moveDown = false;
 
 int main() {
-    int x1, x2, x3, y1, y2, y3;
-
     initscr();
     WINDOW * gameWin = newwin(24, 22, 5, 13); 
     					     // params are (nlines, ncols, ystart, xstart)
@@ -48,10 +46,6 @@ int main() {
     wrefresh(nextBlockWin);
     wrefresh(infoWin);
     
-    getmaxyx(gameWin, y1, x1);
-
-//    mvprintw(22, 45, "Size is x: %d, y: %d",x1, y1); 
-
     // Time Code
     timer_t gameTimer;
     struct sigevent sigev;
@@ -89,6 +83,12 @@ int main() {
             paint(gameWin, MY_RED, y, x);
             moveDown = false;
         }
+	if (c == ' ') {
+	    paint(gameWin, MY_BLACK, y, x);
+	    y = 21;
+	    paint(gameWin, MY_BLACK, y, x);
+	    moveDown = false;
+	}
         c = getch();
     }
 
