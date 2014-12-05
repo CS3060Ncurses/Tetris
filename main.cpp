@@ -7,12 +7,11 @@
 #include <time.h>
 #include <cstdlib>
 
+#include "colors.h"
+
 using namespace std;
 
-// This function will either erase or print a block on the screen. Bool set
-// to false for erase and true for print. The y and x coordinated are
-// where the erasing or printing should be done in the window.
-void paint(WINDOW *win, bool draw, int y, int x);
+void paint(WINDOW *win, int color, int y, int x);
 void alarmFunc(int signal);
 
 bool moveDown = false;
@@ -75,19 +74,19 @@ int main() {
 
     while (c != 'q') {
         if (c == KEY_RIGHT && x < 18) {
-            paint(gameWin, false, y, x);
+            paint(gameWin, MY_BLACK, y, x);
             x += 2;
-            paint(gameWin, true, y, x);
+            paint(gameWin, MY_RED, y, x);
         }
         if (c == KEY_LEFT && x > 1) {
-            paint(gameWin, false, y, x);
+            paint(gameWin, MY_BLACK, y, x);
             x -= 2;
-            paint(gameWin, true, y, x);
+            paint(gameWin, MY_RED, y, x);
         }
         if ((moveDown || c == KEY_DOWN) && y < 22) {
-            paint(gameWin, false, y, x);
+            paint(gameWin, MY_BLACK, y, x);
             y++;
-            paint(gameWin, true, y, x);
+            paint(gameWin, MY_RED, y, x);
             moveDown = false;
         }
         c = getch();
@@ -97,20 +96,16 @@ int main() {
     return 0;
 }
 
-void paint(WINDOW *win, bool draw, int y, int x) {
-    init_pair(1, COLOR_RED, COLOR_BLACK);
-    init_pair(2, COLOR_BLACK, COLOR_BLACK);
+void paint(WINDOW *win, int color, int y, int x) {
+    init_pair(1, COLOR_BLACK, COLOR_BLACK);
+    init_pair(2, COLOR_RED, COLOR_BLACK);
 
-    int pair = 1; // Default red
-    if (draw == FALSE)
-        pair = 2; // Change to black
-    // Remember that a square in the terminal is actually 2 spaces
-    wattron(win, COLOR_PAIR(pair));
+    wattron(win, COLOR_PAIR(color));
     wmove(win, y, x);
     waddch(win, ' '|A_REVERSE); // draw first space
     wmove(win, y, x + 1);
     waddch(win, ' '|A_REVERSE); // draw second space
-    wattroff(win, COLOR_PAIR(pair));
+    wattroff(win, COLOR_PAIR(color));
     wrefresh(win);
 }
 
