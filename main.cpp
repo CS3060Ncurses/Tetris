@@ -1,23 +1,27 @@
 // Copyright Dillon Swanson and Jonathan Sterling 2014
-// v0.01 12/03/14
-// First version testing ncurses library. It simulates the basic tetris engine with a single block
-// that gravitates downward at a slow pace. The getch() function with halfdelay() set will more than likely
-// be replaced in future versions. Also note that there are no window restrictions set so if you move the
-// block out of the bounds of your terminal window you will get some weird effects. Have fun!
+// v0.02 12/05/14
 #include <ncurses.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <time.h>
 #include <cstdlib>
 
-// paint(bool, int, int)
+using namespace std;
+
 // This function will either erase or print a block on the screen. Bool set
 // to false for erase and true for print. The y and x coordinated are
 // where the erasing or printing should be done in the window.
 void paint(WINDOW *win, bool draw, int y, int x);
+void alarmFunc(int signal);
+
+bool moveDown = false;
 
 int main() {
     int x1, x2, x3, y1, y2, y3;
 
     initscr();
-    WINDOW * gameWin = newwin(22, 35, 5, 2);  // creates a new window 
+    WINDOW * gameWin = newwin(24, 22, 5, 13); 
     					     // params are (nlines, ncols, ystart, xstart)
     WINDOW * nextBlockWin = newwin(7, 14, 5, 38);
     WINDOW * infoWin = newwin(12, 14, 13, 38);
@@ -32,7 +36,8 @@ int main() {
     curs_set(0); // Hide the cursor
     noecho(); // Turn off echo
     keypad(stdscr, TRUE); // Enable arrow key input
-    halfdelay(4); // makes getch() return ERR if no input is detected within
+    nodelay(gameWin, TRUE);
+    halfdelay(10); // makes getch() return ERR if no input is detected within
                    // 1 second of the function being called. This is going to
                    // to be replaced for obvious reasons.
     wborder(gameWin, 0, 0, 0, 0, 0, 0, 0, 0);  // creates the border around the specified window
@@ -48,24 +53,45 @@ int main() {
 
 //    mvprintw(22, 45, "Size is x: %d, y: %d",x1, y1); 
 
+    // Time Code
+    timer_t gameTimer;
+    struct sigevent sigev;
+    sigev.sigev_notify = SIGEV_SIGNAL;
+    sigev.sigev_signo = SIGALRM;
+    timer_create(CLOCK_REALTIME, &sigev, &gameTimer);
+    signal(SIGALRM, alarmFunc); // depricated function
+    struct itimerspec currentSpec;
+    struct itimerspec oldSpec;
+    currentSpec.it_interval.tv_sec = 0;
+    currentSpec.it_interval.tv_nsec = 800000000;
+    currentSpec.it_value.tv_sec = 0;
+    currentSpec.it_value.tv_nsec = 800000000;
+    timer_settime(gameTimer, 0, &currentSpec, &oldSpec);
+    // End Time Code
+
     int c = 0; // Character read from stdin
-    int x = 0; // x coordinate (column)
-    int y = 0; // y coordinate (row)
-    do { // do-while loop, may be replaced for a while loop
-        paint(gameWin, false, y, x); // erase the previous block
-        switch(c) {
-            case KEY_RIGHT:
-                x += 2; // One block unit is actually 2 space characters.
-                break;
-            case KEY_LEFT:
-                x -= 2;
-                break;
-            case ERR: // If no input is seen, move down. The problem with this
-                y++;  // is that ANY input will suspend this.
-                break;
+    int x = 1; // x coordinate (column)
+    int y = 1; // y coordinate (row)
+
+    while (c != 'q') {
+        if (c == KEY_RIGHT && x < 18) {
+            paint(gameWin, false, y, x);
+            x += 2;
+            paint(gameWin, true, y, x);
         }
-        paint(gameWin, true, y, x); // draw the block in the new position
-    } while ((c = getch()));
+        if (c == KEY_LEFT && x > 1) {
+            paint(gameWin, false, y, x);
+            x -= 2;
+            paint(gameWin, true, y, x);
+        }
+        if ((moveDown || c == KEY_DOWN) && y < 22) {
+            paint(gameWin, false, y, x);
+            y++;
+            paint(gameWin, true, y, x);
+            moveDown = false;
+        }
+        c = getch();
+    }
 
     endwin();
     return 0;
@@ -74,19 +100,21 @@ int main() {
 void paint(WINDOW *win, bool draw, int y, int x) {
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_BLACK, COLOR_BLACK);
+
     int pair = 1; // Default red
     if (draw == FALSE)
         pair = 2; // Change to black
     // Remember that a square in the terminal is actually 2 spaces
-    attron(COLOR_PAIR(pair));
-//    wmove(win, y, x);
-    move(y, x);
-    addch(' '|A_REVERSE); // draw first space
-//    wmove(win, y, x + 1);
-    move(y, x + 1);
-    addch(' '|A_REVERSE); // draw second space
-    attroff(COLOR_PAIR(pair));
-    refresh();
-//    wrefresh(win);
+    wattron(win, COLOR_PAIR(pair));
+    wmove(win, y, x);
+    waddch(win, ' '|A_REVERSE); // draw first space
+    wmove(win, y, x + 1);
+    waddch(win, ' '|A_REVERSE); // draw second space
+    wattroff(win, COLOR_PAIR(pair));
+    wrefresh(win);
+}
+
+void alarmFunc(int signal) {
+	moveDown = true;
 }
 
