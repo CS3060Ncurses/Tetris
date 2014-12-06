@@ -77,7 +77,12 @@ int main() {
     int y = 1;
     blockNum = rand() % 7 + 1;
 //    Block* currentBlock = new Block(gameWin, blockNum, y, x);
+
+    werase(nextBlockWin); // clears the preview window
+    wborder(nextBlockWin, 0, 0, 0, 0, 0, 0, 0, 0);
+    wrefresh(nextBlockWin);
     Block* nextBlock = new Block(nextBlockWin, blockNum, 3, 4);
+
    // Main game loop
     while (c != 'q' && set == false) {
         if (c == KEY_UP) {
