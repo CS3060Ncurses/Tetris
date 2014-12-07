@@ -1,5 +1,5 @@
 // Copyright Dillon Swanson and Jonathan Sterling 2014
-// v0.03 12/06/14
+// v0.04 12/06/14
 #include <ncurses.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -17,14 +17,9 @@ void paint(WINDOW *win, int color, int y, int x);
 void alarmFunc(int signal);
 void spawnBrick(WINDOW* win, int grid[3][3]);
 
-bool moveDown = false;
+int masterGrid[22][20] = {0};
 
-        //int grid[3][3] =
-        //{
-        //    {0, 1, 0},
-        //    {1, 1, 1},
-        //    {0, 0, 0}
-        //};
+bool moveDown = false;
 
 int main() {
     initscr();
@@ -73,37 +68,48 @@ int main() {
     // End Time Code
 
     int c = 0; // Character read from stdin
-    int x = 1; // x coordinate (column)
-    int y = 1; // y coordinate (row)
-
-    Block* currentBlock = new Block(gameWin, 0, y, x);
-        
-    // Main game loop
+    //int x = 1; // x coordinate (column)
+    //int y = 1; // y coordinate (row)
+    
     while (c != 'q') {
-        if (c == KEY_RIGHT && x < 18) {
-            paint(gameWin, MY_BLACK, y, x);
-            x += 2;
-            paint(gameWin, MY_RED, y, x);
+    bool set = false;
+    int x = 8;
+    int y = 1;
+    Block* currentBlock = new Block(gameWin, 0, y, x);
+    // Main game loop
+    while (c != 'q' && set == false) {
+        if (c == KEY_RIGHT) {
+            if (currentBlock->tryRight(gameWin, y, x)) 
+                x += 2;
         }
         if (c == KEY_LEFT && x > 1) {
-            paint(gameWin, MY_BLACK, y, x);
-            x -= 2;
-            paint(gameWin, MY_RED, y, x);
-        }
-        if ((moveDown || c == KEY_DOWN) && y < 22) {
-            //paint(gameWin, MY_BLACK, y, x);
-            //y++;
+            ///paint(gameWin, MY_BLACK, y, x);
+            //x -= 2;
             //paint(gameWin, MY_RED, y, x);
-            //moveDown = false;
-            currentBlock->moveDown(gameWin, y++, x);
+            if (currentBlock->tryLeft(gameWin, y, x))
+                x -= 2;
         }
-	if (c == ' ') {
-	    paint(gameWin, MY_BLACK, y, x);
-	    y = 21;
-	    paint(gameWin, MY_BLACK, y, x);
-	    moveDown = false;
-	}
+        if ((moveDown || c == KEY_DOWN) && y < 22) { 
+            if (!currentBlock->tryDown(gameWin, y, x)) {
+                set = true;
+                for (int i = 0; i < 3; i++) {
+                    for (int j = 0; j < 3; j++) {
+                        if (currentBlock->grid[i][j] == 1)
+                            masterGrid[y + i][x + j] = 1;
+                    }
+                }
+            } else {
+                y++;
+            }
+        }
+	    if (c == ' ') {
+	        paint(gameWin, MY_BLACK, y, x);
+	        y = 21;
+	        paint(gameWin, MY_BLACK, y, x);
+	        moveDown = false;
+	    }
         c = getch();
+    }
     }
 
     endwin();
@@ -125,19 +131,5 @@ void paint(WINDOW *win, int color, int y, int x) {
 
 void alarmFunc(int signal) {
 	moveDown = true;
-}
-
-void spawnBrick(WINDOW* win, int grid[3][3])  {
-    int y = 5;
-    int x = 5;
-    for (int i = 0; i < 3; i++) {
-        x = 5;
-        for (int j = 0; j < 3; j++) { 
-            if (grid[i][j] == 1)
-                paint(win, MY_RED, y, x);
-            x += 2;
-        }
-        y++;
-    }
 }
 
