@@ -1,7 +1,16 @@
 default: clean build
 
-build:
-	g++ -o Tetris main.cpp -lncurses -lrt
+build: Brick.o Block.o
+	g++ -o Tetris main.cpp Brick.o Block.o -lncurses -lrt
 
-clean:
+Brick.o: Brick.cpp Brick.h
+	g++ -c Brick.cpp
+
+Block.o: Block.cpp Block.h
+	g++ -c Block.cpp
+
+clean: robjs
 	rm -f Tetris
+
+robjs:
+	rm *.o
