@@ -1,10 +1,7 @@
-default: clean build
+default: build
 
-build: Brick.o Block.o
-	g++ -o Tetris main.cpp Brick.o Block.o -lncurses -lrt
-
-Brick.o: Brick.cpp Brick.h
-	g++ -c Brick.cpp
+build: Block.o
+	g++ -o Tetris main.cpp Block.o -lncurses -lrt
 
 Block.o: Block.cpp Block.h
 	g++ -c Block.cpp
