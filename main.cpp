@@ -8,7 +8,6 @@
 #include <cstdlib>
 
 #include "Colors.h"
-#include "Brick.h"
 #include "Block.h"
 
 using namespace std;

@@ -1,4 +1,3 @@
-#include "Brick.h"
 #include "Block.h"
 #include "Templates.h"
 #include "Colors.h"
@@ -10,7 +9,7 @@ Block::Block(WINDOW* win, int id, int row, int col)
     if (id == 0) {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++)
-                grid[i][j] = grid0[i][j];
+                grid[i][j] = grid1[i][j];
         }  
     }
 
