@@ -36,7 +36,7 @@ void Block::moveDown(WINDOW* win, int row, int col) {
 }
 
 bool Block::tryRight(WINDOW* win, int row, int col) {
-    if (col > (16 - bounds[rotate][2])) {
+    if ((col + (bounds[rotate][2] * 2)) >= 20) {
         return false;
     } else {
         this->moveRight(win, row, col);
