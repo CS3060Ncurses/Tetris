@@ -1,5 +1,5 @@
 // Copyright Dillon Swanson and Jonathan Sterling 2014
-// v0.04 12/06/14
+// v0.10 12/09/14
 #include <ncurses.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -7,7 +7,6 @@
 #include <time.h>
 #include <cstdlib>
 
-#include "Colors.h"
 #include "Block.h"
 
 using namespace std;
@@ -72,11 +71,15 @@ int main() {
     
     while (c != 'q') {
     bool set = false;
-    int x = 8;
+    int x = 9;
     int y = 1;
-    Block* currentBlock = new Block(gameWin, 0, y, x);
+    int blockNum = rand() % 7 + 1;
+    Block* currentBlock = new Block(gameWin, blockNum, y, x);
     // Main game loop
     while (c != 'q' && set == false) {
+        if (c == KEY_UP) {
+            currentBlock->tryRotate(gameWin, y, x);
+        }
         if (c == KEY_RIGHT) {
             if (currentBlock->tryRight(gameWin, y, x)) 
                 x += 2;
@@ -93,7 +96,7 @@ int main() {
                 set = true;
                 for (int i = 0; i < 3; i++) {
                     for (int j = 0; j < 3; j++) {
-                        if (currentBlock->grid[i][j] == 1)
+                        if (currentBlock->grid[i][j][currentBlock->rotate] == 1)
                             masterGrid[y + i][x + j] = 1;
                     }
                 }
@@ -102,9 +105,9 @@ int main() {
             }
         }
 	    if (c == ' ') {
-	        paint(gameWin, MY_BLACK, y, x);
+	        paint(gameWin, 8, y, x);
 	        y = 21;
-	        paint(gameWin, MY_BLACK, y, x);
+	        paint(gameWin, 8, y, x);
 	        moveDown = false;
 	    }
         c = getch();

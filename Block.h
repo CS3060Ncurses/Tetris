@@ -5,10 +5,17 @@ using namespace std;
 #define BLOCK_H
 
 class Block {
+private:
 public:
-    int grid[3][3];
+    int grid[4][4][4];
+    int bounds[4][3];
+    int blockID;
+    int rotate;
+    int myColor;
     Block();
     Block(WINDOW* win, int id, int row, int col);
+    void setGridBounds();
+    void tryRotate(WINDOW* win, int row, int col);
     bool tryRight(WINDOW* win, int row, int col);
     bool tryLeft(WINDOW* win, int row, int col);
     bool tryDown(WINDOW* win, int row, int col);
@@ -16,8 +23,5 @@ public:
     void moveRight(WINDOW* win, int row, int col);
     void moveLeft(WINDOW* win, int row, int col);
     void travPrint(WINDOW *win, int color, int row, int col);
-    int getLowest();
-    int getRightMost();
-    int getLeftMost();
 };
 #endif

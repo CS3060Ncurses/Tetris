@@ -1,23 +1,28 @@
 #include "Block.h"
 #include "Templates.h"
-#include "Colors.h"
 
 using namespace std;
 
 Block::Block(WINDOW* win, int id, int row, int col) 
 {
-    if (id == 0) {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++)
-                grid[i][j] = grid1[i][j];
-        }  
-    }
-
-   travPrint(win, MY_RED, row, col);
-  
+    rotate = 0;
+    blockID = id;
+    setGridBounds();
+    travPrint(win, blockID, row, col);
 }
+
+void Block::tryRotate(WINDOW* win, int row, int col) {
+    travPrint(win, 8, row, col);
+    if (rotate < 3)
+        this->rotate++;
+    else
+        this->rotate = 0;
+    setGridBounds();
+    travPrint(win, blockID, row, col);
+}
+
 bool Block::tryDown(WINDOW* win, int row, int col) {
-    if (row > (22 - getLowest())) {
+    if (row > (22 - bounds[rotate][1])) {
         return false;
     } else {
         this->moveDown(win, row, col);
@@ -26,12 +31,12 @@ bool Block::tryDown(WINDOW* win, int row, int col) {
 }
 
 void Block::moveDown(WINDOW* win, int row, int col) {
-    travPrint(win, MY_BLACK, row++, col);
-    travPrint(win, MY_RED, row, col);
+    travPrint(win, 8, row++, col);
+    travPrint(win, blockID, row, col);
 }
 
 bool Block::tryRight(WINDOW* win, int row, int col) {
-    if (col > (16 - getRightMost())) {
+    if (col > (16 - bounds[rotate][2])) {
         return false;
     } else {
         this->moveRight(win, row, col);
@@ -40,13 +45,13 @@ bool Block::tryRight(WINDOW* win, int row, int col) {
 }
 
 void Block::moveRight(WINDOW* win, int row, int col) {
-    travPrint(win, MY_BLACK, row, col);
+    travPrint(win, 8, row, col);
     col += 2;
-    travPrint(win, MY_RED, row, col);
+    travPrint(win, blockID, row, col);
 }
 
 bool Block::tryLeft(WINDOW* win, int row, int col) {
-    if (col < (getLeftMost() + 4)) {
+    if ((col + (bounds[rotate][0] * 2))  <= 1) {
         return false;
     } else {
         this->moveLeft(win, row, col);
@@ -55,18 +60,24 @@ bool Block::tryLeft(WINDOW* win, int row, int col) {
 }
 
 void Block::moveLeft(WINDOW* win, int row, int col) {
-    travPrint(win, MY_BLACK, row, col);
+    travPrint(win, 8, row, col);
     col -= 2;
-    travPrint(win, MY_RED, row, col);
+    travPrint(win, blockID, row, col);
 }
 
 void Block::travPrint(WINDOW *win, int color, int row, int col) {
-    init_pair(1, COLOR_BLACK, COLOR_BLACK);
-    init_pair(2, COLOR_RED, COLOR_BLACK);
-    for (int i = 0; i < 3; i++) {
+    init_pair(8, COLOR_BLACK, COLOR_BLACK);
+    init_pair(1, COLOR_CYAN, COLOR_BLACK);
+    init_pair(2, COLOR_BLUE, COLOR_BLACK);
+    init_pair(3, COLOR_WHITE, COLOR_BLACK);
+    init_pair(4, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(5, COLOR_GREEN, COLOR_BLACK);
+    init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(7, COLOR_RED, COLOR_BLACK);
+    for (int i = 0; i < 4; i++) {
         int tmpcol = col;
-        for (int j = 0; j < 3; j++) {
-            if (grid[i][j] == 1) {
+        for (int j = 0; j < 4; j++) {
+            if (grid[rotate][i][j] == 1) {
                 wattron(win, COLOR_PAIR(color));
                 wmove(win, row, tmpcol);
                 waddch(win, ' '|A_REVERSE); // draw first space
@@ -81,44 +92,75 @@ void Block::travPrint(WINDOW *win, int color, int row, int col) {
     }
 }
 
-int Block::getLowest() {
-    int lowest = 0;
-    for (int i = 0; i < 3; i++) {
-        bool brick = false;
-        for (int j = 0; j < 3; j++) {
-            if (grid[i][j] == 1)
-                brick = true;
+void Block::setGridBounds() {
+    if (blockID == 1) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++)
+                grid[rotate][i][j] = gridI[rotate][i][j];
         }
-        if (brick == true)
-            lowest++;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 3; j++)
+                bounds[i][j] = boundsI[i][j];
+        }  
     }
-    return lowest;
-}
-
-int Block::getRightMost() {
-    int rightest = 0;
-    for (int i = 0; i < 3; i++) {
-        int tmp = 0;
-        for (int j = 0; j < 3; j++) {
-            if (grid[i][j] == 1)
-                tmp = j;
+    if (blockID == 2) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++)
+                grid[rotate][i][j] = gridBL[rotate][i][j];
         }
-        if (tmp > rightest)
-            rightest = tmp;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 3; j++)
+                bounds[i][j] = boundsBL[i][j];
+        }  
     }
-    return rightest;
-}
-
-int Block::getLeftMost() {
-    int leftest = 0;
-    for (int i = 0; i < 3; i++) {
-        int tmp = 2;
-        for (int j = 2; j > -1; j--) {
-            if (grid[i][j] == 1)
-                tmp = j;
+    if (blockID == 3) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++)
+                grid[rotate][i][j] = gridL[rotate][i][j];
         }
-        if (tmp < leftest)
-            leftest = tmp;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 3; j++)
+                bounds[i][j] = boundsL[i][j];
+        }  
     }
-    return leftest;
+    if (blockID == 4) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++)
+                grid[rotate][i][j] = gridB[rotate][i][j];
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 3; j++)
+                bounds[i][j] = boundsB[i][j];
+        }  
+    }
+    if (blockID == 5) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++)
+                grid[rotate][i][j] = gridS[rotate][i][j];
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 3; j++)
+                bounds[i][j] = boundsS[i][j];
+        }  
+    }
+    if (blockID == 6) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++)
+                grid[rotate][i][j] = gridT[rotate][i][j];
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 3; j++)
+                bounds[i][j] = boundsT[i][j];
+        }  
+    }
+    if (blockID == 7) {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++)
+                grid[rotate][i][j] = gridZ[rotate][i][j];
+        }
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 3; j++)
+                bounds[i][j] = boundsZ[i][j];
+        }  
+    }
 }
