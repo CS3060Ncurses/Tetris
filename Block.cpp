@@ -5,7 +5,7 @@ using namespace std;
 
 Block::Block(WINDOW* win, int id, int row, int col) 
 {
-    rotate = 0;
+    rotate = 0; 
     blockID = id;
     setGridBounds();
     travPrint(win, blockID, row, col);
@@ -51,7 +51,7 @@ void Block::moveRight(WINDOW* win, int row, int col) {
 }
 
 bool Block::tryLeft(WINDOW* win, int row, int col) {
-    if ((col + (bounds[rotate][0] * 2))  <= 1) {
+    if ((col + (bounds[rotate][0] * 2)) <= 1) {
         return false;
     } else {
         this->moveLeft(win, row, col);

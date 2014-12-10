@@ -84,7 +84,7 @@ int main() {
             if (currentBlock->tryRight(gameWin, y, x)) 
                 x += 2;
         }
-        if (c == KEY_LEFT && x > 1) {
+        if (c == KEY_LEFT) {
             ///paint(gameWin, MY_BLACK, y, x);
             //x -= 2;
             //paint(gameWin, MY_RED, y, x);
