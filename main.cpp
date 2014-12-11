@@ -1,5 +1,5 @@
 // Copyright Dillon Swanson and Jonathan Sterling 2014
-// v0.10 12/09/14
+// v0.11 12/11/14
 #include <ncurses.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -71,10 +71,10 @@ int main() {
     
     while (c != 'q') {
     bool set = false;
-    int x = 9;
+    int x = 1;
     int y = 1;
     int blockNum = rand() % 7 + 1;
-    Block* currentBlock = new Block(gameWin, blockNum, y, x);
+    Block* currentBlock = new Block(gameWin, masterGrid, blockNum, y, x);
     // Main game loop
     while (c != 'q' && set == false) {
         if (c == KEY_UP) {
@@ -94,12 +94,23 @@ int main() {
         if ((moveDown || c == KEY_DOWN) && y < 22) { 
             if (!currentBlock->tryDown(gameWin, y, x)) {
                 set = true;
-                for (int i = 0; i < 3; i++) {
-                    for (int j = 0; j < 3; j++) {
-                        if (currentBlock->grid[i][j][currentBlock->rotate] == 1)
-                            masterGrid[y + i][x + j] = 1;
+                for (int i = 0; i < 4; i++) {
+                    for (int j = 0; j < 4; j++) {
+                        if (currentBlock->grid[currentBlock->rotate][i][j] == 1) {
+                            //masterGrid[y + i][x + (j * 2)] = 1;
+                            //masterGrid[y + i][x + (j * 2) + 1] = 1;
+                            //masterGrid[y - 1][x - 1] = 1;
+                            masterGrid[(y - 1) + i][(x - 1) + (j * 2)] = 1;
+                            masterGrid[(y - 1) + i][(x - 1) + (j * 2) + 1] = 1;
+                        }
                     }
                 }
+                //for (int i = 0; i < 3; i++) {
+                //    for (int j = 0; j < 3; j++) {
+                //        if (currentBlock->grid[currentBlock->rotate][i][j] == 1)
+                //            masterGrid[y + i][x + j] = 1;
+                //    }
+                //}
             } else {
                 y++;
             }
@@ -116,6 +127,10 @@ int main() {
 
     endwin();
     return 0;
+}
+
+void updateMaster() {
+
 }
 
 void paint(WINDOW *win, int color, int y, int x) {

@@ -9,11 +9,12 @@ private:
 public:
     int grid[4][4][4];
     int bounds[4][3];
+    int localMaster[22][20];
     int blockID;
     int rotate;
     int myColor;
     Block();
-    Block(WINDOW* win, int id, int row, int col);
+    Block(WINDOW* win, int master[22][20], int id, int row, int col);
     void setGridBounds();
     void tryRotate(WINDOW* win, int row, int col);
     bool tryRight(WINDOW* win, int row, int col);

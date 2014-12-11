@@ -3,12 +3,29 @@
 
 using namespace std;
 
-Block::Block(WINDOW* win, int id, int row, int col) 
+Block::Block(WINDOW* win, int master[22][20], int id, int row, int col) 
 {
     rotate = 0; 
     blockID = id;
     setGridBounds();
+    for (int i = 0; i < 22; i++) {
+        for (int j = 0; j < 20; j++) {
+            localMaster[i][j] = master[i][j];        
+        }
+    }
+    
     travPrint(win, blockID, row, col);
+
+    for (int i = 0; i < 22; i++) {
+        for (int j = 0; j < 20; j++) {
+            if (localMaster[i][j] == 1) {
+                wmove(win, (i + 1), (j + 1));
+                waddch(win, 'x'); 
+            }
+        }
+    }
+    wrefresh(win);
+                
 }
 
 void Block::tryRotate(WINDOW* win, int row, int col) {
