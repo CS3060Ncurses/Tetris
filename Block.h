@@ -14,12 +14,14 @@ public:
     int rotate;
     int myColor;
     Block();
-    Block(WINDOW* win, int master[22][20], int id, int row, int col);
+    Block(WINDOW* win, int id, int row, int col);
+    void passMaster(int master[22][20]);
     void setGridBounds();
     void tryRotate(WINDOW* win, int row, int col);
     bool tryRight(WINDOW* win, int row, int col);
     bool tryLeft(WINDOW* win, int row, int col);
     bool tryDown(WINDOW* win, int row, int col);
+    void moveRotate(WINDOW* win, int row, int col);
     void moveDown(WINDOW* win, int row, int col);
     void moveRight(WINDOW* win, int row, int col);
     void moveLeft(WINDOW* win, int row, int col);

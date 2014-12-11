@@ -1,5 +1,5 @@
 // Copyright Dillon Swanson and Jonathan Sterling 2014
-// v0.11 12/11/14
+// v0.20 12/11/14
 #include <ncurses.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -11,11 +11,11 @@
 
 using namespace std;
 
-void paint(WINDOW *win, int color, int y, int x);
+void checkRow(int i);
+void reDraw(WINDOW* win);
 void alarmFunc(int signal);
-void spawnBrick(WINDOW* win, int grid[3][3]);
 
-int masterGrid[22][20] = {0};
+int masterGrid[22][20] = {8};
 
 bool moveDown = false;
 
@@ -65,97 +65,111 @@ int main() {
     timer_settime(gameTimer, 0, &currentSpec, &oldSpec);
     // End Time Code
 
-    int c = 0; // Character read from stdin
-    //int x = 1; // x coordinate (column)
-    //int y = 1; // y coordinate (row)
+    int c = 0;
     int blockNum = rand() % 7 + 1;    
     Block* currentBlock = new Block(gameWin, blockNum, 1, 9);
+    currentBlock->passMaster(masterGrid);
 
     while (c != 'q') {
-    bool set = false;
-    int x = 1;
-    int y = 1;
-    int blockNum = rand() % 7 + 1;
-    Block* currentBlock = new Block(gameWin, masterGrid, blockNum, y, x);
-    // Main game loop
-    blockNum = rand() % 7 + 1;
-//    Block* currentBlock = new Block(gameWin, blockNum, y, x);
+        bool set = false;
+        int x = 9;
+        int y = 1;
+        blockNum = rand() % 7 + 1;
+        //blockNum = 1;
 
-    werase(nextBlockWin); // clears the preview window
-    wborder(nextBlockWin, 0, 0, 0, 0, 0, 0, 0, 0);
-    wrefresh(nextBlockWin);
-    Block* nextBlock = new Block(nextBlockWin, blockNum, 3, 4);
+        werase(nextBlockWin); // clears the preview window
+        wborder(nextBlockWin, 0, 0, 0, 0, 0, 0, 0, 0);
+        wrefresh(nextBlockWin);
+        Block* nextBlock = new Block(nextBlockWin, blockNum, 3, 4);
 
-   // Main game loop
-    while (c != 'q' && set == false) {
-        if (c == KEY_UP) {
-            currentBlock->tryRotate(gameWin, y, x);
-        }
-        if (c == KEY_RIGHT) {
-            if (currentBlock->tryRight(gameWin, y, x)) 
-                x += 2;
-        }
-        if (c == KEY_LEFT) {
-            ///paint(gameWin, MY_BLACK, y, x);
-            //x -= 2;
-            //paint(gameWin, MY_RED, y, x);
-            if (currentBlock->tryLeft(gameWin, y, x))
-                x -= 2;
-        }
-        if ((moveDown || c == KEY_DOWN) && y < 22) { 
-            if (!currentBlock->tryDown(gameWin, y, x)) {
-                set = true;
-                for (int i = 0; i < 4; i++) {
-                    for (int j = 0; j < 4; j++) {
-                        if (currentBlock->grid[currentBlock->rotate][i][j] == 1) {
-                            //masterGrid[y + i][x + (j * 2)] = 1;
-                            //masterGrid[y + i][x + (j * 2) + 1] = 1;
-                            //masterGrid[y - 1][x - 1] = 1;
-                            masterGrid[(y - 1) + i][(x - 1) + (j * 2)] = 1;
-                            masterGrid[(y - 1) + i][(x - 1) + (j * 2) + 1] = 1;
+        //Print out masterGrid for debugging
+        //for (int i = 0; i < 22; i ++) {
+            //for (int j = 0; j < 20; j++) {
+              //      wmove(gameWin, (i + 1), (j + 1));
+            //        waddch(gameWin, masterGrid[i][j]);
+          //  }
+        //}
+        //wrefresh(gameWin);
+
+        // Main game loop
+        while (c != 'q' && set == false) {
+            if (c == KEY_UP) {
+                currentBlock->tryRotate(gameWin, y, x);
+            }
+            if (c == KEY_RIGHT) {
+                if (currentBlock->tryRight(gameWin, y, x)) 
+                    x += 2;
+            }
+            if (c == KEY_LEFT) {
+                if (currentBlock->tryLeft(gameWin, y, x))
+                    x -= 2;
+            }
+            if ((moveDown || c == KEY_DOWN) && y < 22) { 
+                if (!currentBlock->tryDown(gameWin, y, x)) {
+                    set = true;
+                    for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (currentBlock->grid[currentBlock->rotate][i][j] == 1) {
+                                masterGrid[(y - 1) + i][(x - 1) + (j * 2)] = currentBlock->blockID;
+                                masterGrid[(y - 1) + i][(x - 1) + (j * 2) + 1] = currentBlock->blockID;
+                            }
                         }
                     }
+                    for (int i = 0; i > 22; i++)
+                        checkRow(i);
+
+                    reDraw(gameWin);
+                } else {
+                    y++;
                 }
-                //for (int i = 0; i < 3; i++) {
-                //    for (int j = 0; j < 3; j++) {
-                //        if (currentBlock->grid[currentBlock->rotate][i][j] == 1)
-                //            masterGrid[y + i][x + j] = 1;
-                //    }
-                //}
-            } else {
-                y++;
             }
+	        if (c == ' ') {
+	            // drop down
+	        }
+            c = getch();
         }
-	    if (c == ' ') {
-	        paint(gameWin, 8, y, x);
-	        y = 21;
-	        paint(gameWin, 8, y, x);
-	        moveDown = false;
-	    }
-        c = getch();
-    }
-     currentBlock = nextBlock;
+        currentBlock = nextBlock;
+        currentBlock->passMaster(masterGrid);
     }
 
     endwin();
     return 0;
 }
 
-void updateMaster() {
-
+void checkRow(int i) {
+    bool hole = false;
+    for (int j = 0; j < 20; j++) {
+        if (masterGrid[i][j] == 8)
+            hole = true;
+    }
+    if (hole == false) {
+        for (int j = 0; j < 20; j++)
+            masterGrid[i][j] = masterGrid[i - 1][j];
+    }
 }
 
-void paint(WINDOW *win, int color, int y, int x) {
-    init_pair(1, COLOR_BLACK, COLOR_BLACK);
-    init_pair(2, COLOR_RED, COLOR_BLACK);
+void reDraw(WINDOW* win) {
+    init_pair(1, COLOR_CYAN, COLOR_BLACK);
+    init_pair(2, COLOR_BLUE, COLOR_BLACK);
+    init_pair(3, COLOR_WHITE, COLOR_BLACK);
+    init_pair(4, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(5, COLOR_GREEN, COLOR_BLACK);
+    init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(7, COLOR_RED, COLOR_BLACK);
+    init_pair(8, COLOR_BLACK, COLOR_BLACK);
 
-    wattron(win, COLOR_PAIR(color));
-    wmove(win, y, x);
-    waddch(win, ' '|A_REVERSE); // draw first space
-    wmove(win, y, x + 1);
-    waddch(win, ' '|A_REVERSE); // draw second space
-    wattroff(win, COLOR_PAIR(color));
-    wrefresh(win);
+    for (int i = 0; i < 22; i ++) {
+        for (int j = 0; j < 20; j++) {
+            if (masterGrid[i][j] == 8) {
+            wattron(win, COLOR_PAIR(masterGrid[i][j]));
+            wmove(win, i + 1, j + 1);
+            waddch(win, ' '|A_REVERSE);
+            int colorz = masterGrid[i][j];
+            wattroff(win, COLOR_PAIR(masterGrid[i][j]));
+            wrefresh(win);
+            }
+        }
+    }
 }
 
 void alarmFunc(int signal) {
