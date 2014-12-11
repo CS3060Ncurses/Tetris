@@ -68,7 +68,9 @@ int main() {
     int c = 0; // Character read from stdin
     //int x = 1; // x coordinate (column)
     //int y = 1; // y coordinate (row)
-    
+    int blockNum = rand() % 7 + 1;    
+    Block* currentBlock = new Block(gameWin, blockNum, 1, 9);
+
     while (c != 'q') {
     bool set = false;
     int x = 1;
@@ -76,6 +78,15 @@ int main() {
     int blockNum = rand() % 7 + 1;
     Block* currentBlock = new Block(gameWin, masterGrid, blockNum, y, x);
     // Main game loop
+    blockNum = rand() % 7 + 1;
+//    Block* currentBlock = new Block(gameWin, blockNum, y, x);
+
+    werase(nextBlockWin); // clears the preview window
+    wborder(nextBlockWin, 0, 0, 0, 0, 0, 0, 0, 0);
+    wrefresh(nextBlockWin);
+    Block* nextBlock = new Block(nextBlockWin, blockNum, 3, 4);
+
+   // Main game loop
     while (c != 'q' && set == false) {
         if (c == KEY_UP) {
             currentBlock->tryRotate(gameWin, y, x);
@@ -123,6 +134,7 @@ int main() {
 	    }
         c = getch();
     }
+     currentBlock = nextBlock;
     }
 
     endwin();
