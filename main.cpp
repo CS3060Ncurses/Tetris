@@ -100,16 +100,13 @@ int main() {
         while (c != 'q' && set == false) {
             if (c == KEY_UP) {
                 currentBlock->tryRotate(gameWin, y, x);
-            }
-            if (c == KEY_RIGHT) {
+            } else if (c == KEY_RIGHT) {
                 if (currentBlock->tryRight(gameWin, y, x)) 
                     x += 2;
-            }
-            if (c == KEY_LEFT) {
+            } else if (c == KEY_LEFT) {
                 if (currentBlock->tryLeft(gameWin, y, x))
                     x -= 2;
-            }
-            if ((moveDown || c == KEY_DOWN) && y < 22) { 
+            } else if ((moveDown || c == KEY_DOWN) && y < 22) { 
                 if (!currentBlock->tryDown(gameWin, y, x)) {
                     set = true;
                     for (int i = 0; i < 4; i++) {
@@ -127,10 +124,11 @@ int main() {
                 } else {
                     y++;
                 }
-            }
-	        if (c == ' ') {
-	            // drop down
-	        }
+            } else if (c == ' ') {
+		while (!currentBlock->tryDown(gameWin, y, x))
+			y++;
+		
+	    }
             c = getch();
         }
         currentBlock = nextBlock;
