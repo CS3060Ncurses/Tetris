@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <cstdlib>
+#include <algorithm>
 
 #include "Block.h"
 
@@ -16,10 +17,12 @@ void reDraw(WINDOW* win);
 void alarmFunc(int signal);
 
 int masterGrid[22][20] = {8};
-
+//int masterGrid[22][20];
+//fill(&masterGrid[0][0], &masterGrid[0][0] + sizeof(masterGrid), 8);
 bool moveDown = false;
 
 int main() {
+    //fill(&masterGrid[0][0], &masterGrid[0][0] + sizeof(masterGrid), 8);
     initscr();
     WINDOW * gameWin = newwin(24, 22, 5, 13); 
     					     // params are (nlines, ncols, ystart, xstart)
@@ -85,11 +88,13 @@ int main() {
         //Print out masterGrid for debugging
         //for (int i = 0; i < 22; i ++) {
             //for (int j = 0; j < 20; j++) {
-              //      wmove(gameWin, (i + 1), (j + 1));
-            //        waddch(gameWin, masterGrid[i][j]);
+                //if (masterGrid[i][j] != 8) {
+                //    wmove(gameWin, (i + 1), (j + 1));
+              //      waddch(gameWin, 'x');
+            //    }
           //  }
         //}
-        //wrefresh(gameWin);
+        wrefresh(gameWin);
 
         // Main game loop
         while (c != 'q' && set == false) {
