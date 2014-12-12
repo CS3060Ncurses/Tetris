@@ -125,8 +125,10 @@ int main() {
                     y++;
                 }
             } else if (c == ' ') {
-	            // drop down
+		        while (!currentBlock->tryDown(gameWin, y, x))
+			        y++;
 	        }
+
             c = getch();
         }
         currentBlock = nextBlock;
