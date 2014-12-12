@@ -1,32 +1,52 @@
+//****************************************************
+// main.cpp
 // Copyright Dillon Swanson and Jonathan Sterling 2014
-// v0.20 12/11/14
+//  v0.50
+//  December 12th, 2014
+//  Class: CS 3060 Mike Wright
+//  This program simulates the class Tetris game
+//****************************************************
+
 #include <ncurses.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <sys/time.h>
 #include <time.h>
 #include <cstdlib>
+#include <menu.h>
 
 #include "Block.h"
 
 using namespace std;
 
+// void checkRows(WINDOW* win)
+// Purpose: To check all of the rows of the game window to see if
+// that there are any completed rows.
+// Parameters: A pointer to the window to check.
+// Returns: void
 void checkRows(WINDOW* win);
+
+// void reDraw(WINDOW* win)
+// Purpose: To redraw the game window after making any adjustments
+// to it.
+// Parameters: A pointer to the window to redraw.
+// Returns: void.
 void reDraw(WINDOW* win);
+
+// void alarmFunc(int signal)
+// Purpose: Signal handler for the game clock.
+// Parameters: One integer value that is the signal to be caught.
+// Returns: void
 void alarmFunc(int signal);
 
 int masterGrid[22][20] = {8};
+int lines;
+int gameSpeed = 800000000;
 bool moveDown = false;
 
 int main() {
-    for (int i = 0; i < 22; i++) {
-        for (int j = 0; j < 20; j++) {
-            masterGrid[i][j] = 8;
-        }
-    }
     initscr();
-    WINDOW * gameWin = newwin(24, 22, 5, 13); 
-    					     // params are (nlines, ncols, ystart, xstart)
+    WINDOW * gameWin = newwin(24, 22, 5, 13);
     WINDOW * nextBlockWin = newwin(7, 14, 5, 38);
     WINDOW * infoWin = newwin(12, 14, 13, 38);
 
@@ -41,15 +61,13 @@ int main() {
     noecho(); // Turn off echo
     keypad(stdscr, TRUE); // Enable arrow key input
     nodelay(gameWin, TRUE);
-    halfdelay(10); // makes getch() return ERR if no input is detected within
-                   // 1 second of the function being called. This is going to
-                   // to be replaced for obvious reasons.
+    halfdelay(10);
     wborder(gameWin, 0, 0, 0, 0, 0, 0, 0, 0);  // creates the border around the specified window
     wborder(nextBlockWin, 0, 0, 0, 0, 0, 0, 0, 0);
     wborder(infoWin, 0, 0, 0, 0, 0, 0, 0, 0);
     
     refresh();
-    wrefresh(gameWin); // needed to refresh a specific window
+    wrefresh(gameWin);
     wrefresh(nextBlockWin);
     wrefresh(infoWin);
     
@@ -59,59 +77,69 @@ int main() {
     sigev.sigev_notify = SIGEV_SIGNAL;
     sigev.sigev_signo = SIGALRM;
     timer_create(CLOCK_REALTIME, &sigev, &gameTimer);
-    signal(SIGALRM, alarmFunc); // depricated function
+    signal(SIGALRM, alarmFunc);
     struct itimerspec currentSpec;
     struct itimerspec oldSpec;
     currentSpec.it_interval.tv_sec = 0;
-    currentSpec.it_interval.tv_nsec = 800000000;
+    currentSpec.it_interval.tv_nsec = gameSpeed;
     currentSpec.it_value.tv_sec = 0;
-    currentSpec.it_value.tv_nsec = 800000000;
+    currentSpec.it_value.tv_nsec = gameSpeed;
     timer_settime(gameTimer, 0, &currentSpec, &oldSpec);
     // End Time Code
+    
+    // Menu Code;
+    mvprintw(0, 13, "Press 'q' to quit at any time");
+    mvprintw(14, 42, "LINES");
+    // end Menu Code
 
-    int c = 0;
-    int blockNum = rand() % 7 + 1;    
-    Block* currentBlock = new Block(gameWin, blockNum, 1, 9);
-    currentBlock->passMaster(masterGrid);
-    bool alive = true;
-    while (c != 'q' && alive == true) {
-        bool set = false;
-        int x = 9;
-        int y = 1;
-        blockNum = rand() % 7 + 1;
-        //blockNum = 1;
+    // MAIN GAME LOOP
+    bool playing = true;
+    while (playing) {
+        
+        // Reset the masterGrid
+        for (int i = 0; i < 22; i++) {
+            for (int j = 0; j < 20; j++) {
+                masterGrid[i][j] = 8;
+            }
+        }
+        
+        reDraw(gameWin);
+        int c = 0;
+        int blockNum = rand() % 7 + 1;
+        bool alive = true;
+        lines = 0;
+        mvprintw(16, 44, "%d", lines);
+        Block* currentBlock = new Block(gameWin, blockNum, 1, 9);
+        currentBlock->passMaster(masterGrid);
+        
+        // Match loop
+        while (c != 'q' && alive == true) {
+            bool set = false;
+            int x = 9;
+            int y = 1;
 
-        werase(nextBlockWin); // clears the preview window
-        wborder(nextBlockWin, 0, 0, 0, 0, 0, 0, 0, 0);
-        wrefresh(nextBlockWin);
-        Block* nextBlock = new Block(nextBlockWin, blockNum, 3, 4);
+            werase(nextBlockWin); // clears the preview window
+            wborder(nextBlockWin, 0, 0, 0, 0, 0, 0, 0, 0);
+            wrefresh(nextBlockWin);
+            wrefresh(gameWin);
 
-        //Print out masterGrid for debugging
-        //for (int i = 0; i < 22; i ++) {
-          //  for (int j = 0; j < 20; j++) {
-            //    if (masterGrid[i][j] != 8) {
-              //      wmove(gameWin, (i + 1), (j + 1));
-                //    waddch(gameWin, 'x');
-                //}
-            //}
-        //}
-        wrefresh(gameWin);
-        //if (!currentBlock->spawn(gameWin, y, x))
-            //alive = false;
-        alive = currentBlock->spawn(gameWin, y, x);
-        // Main game loop
-        while (c != 'q' && set == false) {
-            if (c == KEY_UP) {
-                currentBlock->tryRotate(gameWin, y, x);
-            } else if (c == KEY_RIGHT) {
-                if (currentBlock->tryRight(gameWin, y, x)) 
-                    x += 2;
-            } else if (c == KEY_LEFT) {
-                if (currentBlock->tryLeft(gameWin, y, x))
-                    x -= 2;
-            } else if ((moveDown || c == KEY_DOWN) && y < 22) { 
-                if (!currentBlock->tryDown(gameWin, y, x)) {
-                    set = true;
+            blockNum = rand() % 7 + 1;
+            Block* nextBlock = new Block(nextBlockWin, blockNum, 3, 4);
+            alive = currentBlock->spawn(gameWin, y, x);
+
+            // Block loop
+            while (c != 'q' && set == false) {
+                if (c == KEY_UP) {
+                    currentBlock->tryRotate(gameWin, y, x);
+                } else if (c == KEY_RIGHT) {
+                    if (currentBlock->tryRight(gameWin, y, x)) 
+                        x += 2;
+                } else if (c == KEY_LEFT) {
+                    if (currentBlock->tryLeft(gameWin, y, x))
+                        x -= 2;
+                } else if ((moveDown || c == KEY_DOWN) && y < 22) { 
+                    if (!currentBlock->tryDown(gameWin, y, x)) {
+                        set = true;
                     for (int i = 0; i < 4; i++) {
                         for (int j = 0; j < 4; j++) {
                             if (currentBlock->grid[currentBlock->rotate][i][j] == 1) {
@@ -121,35 +149,54 @@ int main() {
                         }
                     }
                     checkRows(gameWin);
-
                     reDraw(gameWin);
-                } else {
-                    y++;
-                }
-            } else if (c == ' ') {
-		        while (!currentBlock->tryDown(gameWin, y, x))
-			        y++;
-	        }
+                    } else {
+                        y++;
+                    }
+                } else if (c == ' ') {
+		        //while (!currentBlock->tryDown(gameWin, y, x))
+			        //y++;
+                gameSpeed += 100000000;
+                currentSpec.it_interval.tv_sec = 0;
+                currentSpec.it_interval.tv_nsec = gameSpeed;
+                currentSpec.it_value.tv_sec = 0;
+                currentSpec.it_value.tv_nsec = gameSpeed;
+                timer_settime(gameTimer, 0, &currentSpec, &oldSpec);
+	            }
 
-            c = getch();
+                c = getch();
+            }
+            currentBlock = nextBlock;
+            currentBlock->passMaster(masterGrid);
         }
-        currentBlock = nextBlock;
-        currentBlock->passMaster(masterGrid);
-    }
+            if (c != 'q') {
+                mvprintw(3, 13, "Press 'n' to play a new game");
+                bool response = false;
+                while (!response) {
+                    c = getch();
+                    if (c == 'n') {
+                        response = true;
+                    } else if (c == 'q') {
+                        response = true;
+                        playing = false;
+                    }
+                }
+            } else {
+                playing = false;
+            }
+            mvprintw(3, 13, "                             ");
+        }
 
     endwin();
     return 0;
 }
 
 void checkRows(WINDOW* win) {
-    //bool hole = false;
-    //int n = 0;
     for (int i = 0; i < 22; i++) {
         bool hole = false;
         for (int j = 0; j < 20; j++) {
             if (masterGrid[i][j] == 8)
                 hole = true;
-            //n++;
         }
         if (hole == false) {
             for (int l = i; l > 0; l--)
@@ -158,19 +205,10 @@ void checkRows(WINDOW* win) {
                     masterGrid[l][k] = masterGrid[l - 1][k];
                 }
             }
+            lines++;
+            mvprintw(16, 44, "%d", lines);
         }
     }
-    //if (hole == false) {
-      //  for (int i = 0; i < 22; i++) {
-        //    for (int j = 0; j < 20; j++){
-          //      if (i < 21)
-            //        masterGrid[i][j] = masterGrid[i - 1][j];
-            //}
-        //}
-    //}
-    //wmove(win, 9, 9);
-    //waddch(win, (char)n);
-    //wrefresh(win);
 }
 
 void reDraw(WINDOW* win) {
@@ -185,14 +223,12 @@ void reDraw(WINDOW* win) {
 
     for (int i = 0; i < 22; i ++) {
         for (int j = 0; j < 20; j++) {
-            //if (masterGrid[i][j] == 8) {
             wattron(win, COLOR_PAIR(masterGrid[i][j]));
             wmove(win, i + 1, j + 1);
             waddch(win, ' '|A_REVERSE);
             int colorz = masterGrid[i][j];
             wattroff(win, COLOR_PAIR(masterGrid[i][j]));
             wrefresh(win);
-            //}
         }
     }
 }

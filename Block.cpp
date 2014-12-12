@@ -7,12 +7,9 @@ Block::Block(WINDOW* win, int id, int row, int col)
 {
     rotate = 0; 
     blockID = id;
-    setGridBounds();
-    
+    setGridBounds(); 
     travPrint(win, blockID, row, col);
-
     wrefresh(win);
-                
 }
 
 void Block::passMaster(int master[22][20]) {
@@ -38,7 +35,6 @@ bool Block::spawn(WINDOW* win, int row, int col) {
 }
 
 void Block::tryRotate(WINDOW* win, int row, int col) {
-    // Collision checking
     bool collision = false;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -66,7 +62,6 @@ void Block::moveRotate(WINDOW* win, int row, int col) {
 }
 
 bool Block::tryDown(WINDOW* win, int row, int col) {
-    // Collision checking
     bool collision = false;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -76,8 +71,6 @@ bool Block::tryDown(WINDOW* win, int row, int col) {
             }
         }
     }
-
-
     if (row > (22 - bounds[rotate][1]) || collision == true) {
         return false;
     } else {
@@ -92,7 +85,6 @@ void Block::moveDown(WINDOW* win, int row, int col) {
 }
 
 bool Block::tryRight(WINDOW* win, int row, int col) {
-    // Collision checking
     bool collision = false;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -155,9 +147,9 @@ void Block::travPrint(WINDOW *win, int color, int row, int col) {
             if (grid[rotate][i][j] == 1) {
                 wattron(win, COLOR_PAIR(color));
                 wmove(win, row, tmpcol);
-                waddch(win, ' '|A_REVERSE); // draw first space
+                waddch(win, ' '|A_REVERSE);
                 wmove(win, row, tmpcol + 1);
-                waddch(win, ' '|A_REVERSE); // draw second space
+                waddch(win, ' '|A_REVERSE);
                 wattroff(win, COLOR_PAIR(color));
                 wrefresh(win);
             }
