@@ -17,6 +17,7 @@ public:
     Block(WINDOW* win, int id, int row, int col);
     void passMaster(int master[22][20]);
     void setGridBounds();
+    bool spawn(WINDOW* win, int row, int col);
     void tryRotate(WINDOW* win, int row, int col);
     bool tryRight(WINDOW* win, int row, int col);
     bool tryLeft(WINDOW* win, int row, int col);

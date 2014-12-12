@@ -23,6 +23,20 @@ void Block::passMaster(int master[22][20]) {
     }
 }
 
+bool Block::spawn(WINDOW* win, int row, int col) {
+    bool collision = false;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (grid[rotate][i][j] == 1) {
+                if (localMaster[(row - 1) + i][(col - 1) + (j * 2)] != 8)
+                    collision = true;
+            }
+        }
+    }
+    travPrint(win, blockID, row, col);
+    return !collision;
+}
+
 void Block::tryRotate(WINDOW* win, int row, int col) {
     // Collision checking
     bool collision = false;

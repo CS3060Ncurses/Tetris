@@ -73,8 +73,8 @@ int main() {
     int blockNum = rand() % 7 + 1;    
     Block* currentBlock = new Block(gameWin, blockNum, 1, 9);
     currentBlock->passMaster(masterGrid);
-
-    while (c != 'q') {
+    bool alive = true;
+    while (c != 'q' && alive == true) {
         bool set = false;
         int x = 9;
         int y = 1;
@@ -96,7 +96,9 @@ int main() {
             //}
         //}
         wrefresh(gameWin);
-
+        //if (!currentBlock->spawn(gameWin, y, x))
+            //alive = false;
+        alive = currentBlock->spawn(gameWin, y, x);
         // Main game loop
         while (c != 'q' && set == false) {
             if (c == KEY_UP) {
