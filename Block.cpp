@@ -32,7 +32,7 @@ void Block::tryRotate(WINDOW* win, int row, int col) {
                 int y = (row - 1) + i;
                 int x = (col - 1) + (j * 2);
                 int tmp = localMaster[(row - 1) + i][(col - 1) + (j * 2)];
-                if (tmp != 0 || x < 0 || x > 19 || y > 21)
+                if (tmp != 8 || x < 0 || x > 19 || y > 21)
                     collision = true;
             }
         }
@@ -57,7 +57,7 @@ bool Block::tryDown(WINDOW* win, int row, int col) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (grid[rotate][i][j] == 1) {
-                if (localMaster[row + i][(col - 1) + (j * 2)] != 0)
+                if (localMaster[row + i][(col - 1) + (j * 2)] != 8)
                     collision = true;
             }
         }
@@ -83,7 +83,7 @@ bool Block::tryRight(WINDOW* win, int row, int col) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (grid[rotate][i][j] == 1) {
-                if (localMaster[(row - 1) + i][(col - 1) + (j * 2) + 2] != 0)
+                if (localMaster[(row - 1) + i][(col - 1) + (j * 2) + 2] != 8)
                     collision = true;
             }
         }
@@ -107,7 +107,7 @@ bool Block::tryLeft(WINDOW* win, int row, int col) {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (grid[rotate][i][j] == 1) {
-                if (localMaster[(row - 1) + i][(col - 1) + (j * 2) - 1] != 0)
+                if (localMaster[(row - 1) + i][(col - 1) + (j * 2) - 1] != 8)
                     collision = true;
             }
         }
