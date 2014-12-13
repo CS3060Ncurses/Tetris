@@ -167,10 +167,10 @@ int main() {
                     }
 		    moveDown = false;
                 } else if (c == ' ') {
-		        while (currentBlock->tryDown(gameWin, y, x))
-			    y++;
-			set = true;
-		for (int i = 0; i < 4; i++) {
+		    while (currentBlock->tryDown(gameWin, y, x))
+		        y++;
+		    set = true;
+		    for (int i = 0; i < 4; i++) {
                         for (int j = 0; j < 4; j++) {
                             if (currentBlock->grid[currentBlock->rotate][i][j] == 1) {
                                 masterGrid[(y - 1) + i][(x - 1) + (j * 2)] = currentBlock->blockID;
@@ -178,6 +178,8 @@ int main() {
                             }
                         }
                     }
+		    checkRows(gameWin);
+                    reDraw(gameWin);
 	        }
 
                 c = getch();
