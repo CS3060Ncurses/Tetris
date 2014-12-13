@@ -40,7 +40,7 @@ void reDraw(WINDOW* win);
 void alarmFunc(int signal);
 
 int masterGrid[22][20] = {8};
-int lines, gameSpeed = 800000000, WIDTH = 55, HEIGHT = 30 ;
+int lines, gameSpeed = 800000000, WIDTH = 55, HEIGHT = 32;
 int x, y;
 bool moveDown = false;
 
@@ -99,6 +99,9 @@ int main() {
     // Menu Code;
     mvprintw(0, 13, "Press 'q' to quit at any time");
     mvprintw(14, 42, "LINES");
+    mvprintw(30, 13, "Use arrow keys to move the blocks\n");
+    mvprintw(31, 13, "Use up arrow key to rotate the blocks\n");
+    mvprintw(32, 13, "Use spacebar to instantly drop blocks");
     // end Menu Code
 
     // MAIN GAME LOOP
