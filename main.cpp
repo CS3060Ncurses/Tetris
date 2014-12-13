@@ -116,6 +116,9 @@ int main() {
         }
         
         reDraw(gameWin);
+
+	srand ( time(NULL) ); //uses the time to create randomness
+	
         int c = 0;
         int blockNum = rand() % 7 + 1;
         bool alive = true;
