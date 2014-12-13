@@ -40,8 +40,8 @@ void reDraw(WINDOW* win);
 void alarmFunc(int signal);
 
 int masterGrid[22][20] = {8};
-int lines;
-int gameSpeed = 800000000;
+int lines, gameSpeed = 800000000, WIDTH = 55, HEIGHT = 30 ;
+int x, y;
 bool moveDown = false;
 
 int main() {
@@ -55,6 +55,15 @@ int main() {
         printf("Your terminal needs to be colors to play Tetris!\n");
         exit(1);
     }
+
+     getmaxyx(stdscr, y, x);
+     if(x < WIDTH || y < HEIGHT)
+     {
+         endwin();
+         printf("ERROR, your terminal is too small. (min %ux%u)\n", WIDTH, HEIGHT);
+         return 1;
+     }
+
     
     start_color(); // Start teh col0rz
     curs_set(0); // Hide the cursor
@@ -111,7 +120,7 @@ int main() {
         mvprintw(16, 44, "%d", lines);
         Block* currentBlock = new Block(gameWin, blockNum, 1, 9);
         currentBlock->passMaster(masterGrid);
-        
+        int count = 0;
         // Match loop
         while (c != 'q' && alive == true) {
             bool set = false;
@@ -153,16 +162,20 @@ int main() {
                     } else {
                         y++;
                     }
+		    moveDown = false;
                 } else if (c == ' ') {
-		        //while (!currentBlock->tryDown(gameWin, y, x))
-			        //y++;
-                gameSpeed += 100000000;
-                currentSpec.it_interval.tv_sec = 0;
-                currentSpec.it_interval.tv_nsec = gameSpeed;
-                currentSpec.it_value.tv_sec = 0;
-                currentSpec.it_value.tv_nsec = gameSpeed;
-                timer_settime(gameTimer, 0, &currentSpec, &oldSpec);
-	            }
+		        while (currentBlock->tryDown(gameWin, y, x))
+			    y++;
+			set = true;
+		for (int i = 0; i < 4; i++) {
+                        for (int j = 0; j < 4; j++) {
+                            if (currentBlock->grid[currentBlock->rotate][i][j] == 1) {
+                                masterGrid[(y - 1) + i][(x - 1) + (j * 2)] = currentBlock->blockID;
+                                masterGrid[(y - 1) + i][(x - 1) + (j * 2) + 1] = currentBlock->blockID;
+                            }
+                        }
+                    }
+	        }
 
                 c = getch();
             }
